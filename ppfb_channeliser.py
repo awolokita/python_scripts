@@ -50,6 +50,7 @@ class ppfb_channeliser:
         stop = cutoff+trans#(0.5 + cutoff)/2 # (trans_alpha/4)
         bands = [0, cutoff, stop, 0.5]
         self.filter = remez(512, bands, [1,0])
+        
         w, h = freqz(self.filter)
         plot_response(fs, w, h, "Low-pass Filter")
         t = np.arange(0,10,1/fs)
@@ -60,3 +61,4 @@ class ppfb_channeliser:
         plt.figure()
         plt.specgram(y,NFFT=512,Fs=fs,noverlap=0)
         
+    
