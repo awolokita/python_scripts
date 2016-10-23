@@ -27,6 +27,11 @@ def plot_response(fs, w, h, title):
     plt.ylabel('Gain (dB)')
     plt.title(title)
 
+def fir(x,taps):
+    y = np.multiply(x,taps)
+    y = np.sum(y)
+    return y
+    
 class ppfb_channeliser:
     
     def __init__(self, fs, input_bandwidth, channel_bandwidth,
@@ -34,7 +39,7 @@ class ppfb_channeliser:
         self.input_fs = fs
         self.num_channels = next_pow_2(num_channels)
         self.input_bandwidth = input_bandwidth
-        self.channel_spacing = input_bandwidth/num_channels
+        self.channel_spacing = fs/num_channels
         self.output_fs = self.channel_spacing
         self.channel_bandwidth = channel_bandwidth
         
@@ -42,15 +47,14 @@ class ppfb_channeliser:
     def create_filter(self, trans_alpha):
         # TODO: Check that len(taps)%num_channels = 0
         fs = self.input_fs
-        norm = fs
+        norm = fs/2
         channel_bandwidth = self.channel_bandwidth
         num_channels = self.num_channels
 
 #        trans_alpha = max(min(trans_alpha,1),0)
         
-        cutoff = (channel_bandwidth/2)/norm
-        trans = cutoff*0.2
-        stop = cutoff+trans#(0.5 + cutoff)/2 # (trans_alpha/4)
+        cutoff = (channel_bandwidth/norm)
+        stop = (self.output_fs/2)/norm
         bands = [0, cutoff, stop, 0.5]
         taps = remez(512, bands, [1,0])
         
@@ -78,12 +82,12 @@ class ppfb_channeliser:
         N = int(L/M)
         delay_lines = list()
         bank_output = np.ravel(np.zeros([1,M]))
-        channel_outputs = np.ndarray([len(x),M])
         
         # Zero pad the input signal
         z = L-np.mod(len(x),L)
         x = np.ravel(x)
         x = np.concatenate([x,np.ravel(np.zeros([1,z]))])
+        channel_outputs = np.ndarray([np.int32(len(x)/M),M],dtype='complex')
         #x = np.reshape(x, [-1,L])
         
         #  Create an array of circular buffers
@@ -97,12 +101,13 @@ class ppfb_channeliser:
                 path_filter = self.polyphase_filter_bank[i]
                 path_line = delay_lines[i]
                 path_line.appendleft(inputs[i])
-                bank_output[i] = lfilter(path_filter,1,path_line)
+                #bank_output[i] = lfilter(path_filter,1,path_line)
+                bank_output[i] = fir(path_line,path_filter)
             
             # Perform FFT stage of channeliser
-            channel_outputs[k/M] = np.fft(bank_output,n=M)
+            channel_outputs[k/M] = np.fft.fft(np.complex64(bank_output),n=M)
         
         return channel_outputs
         
-    def fir(x,taps):
-        
+    def get_output_fs(self):
+        return self.output_fs
