@@ -3,14 +3,14 @@ from scipy.signal import spectrogram
 
 class fsk:
     
-    def __init__(self):
-        self.fs = 1000.0
+    def __init__(self, fs, fc, fdelta):
+        self.fs = fs
         # Symbol period
         self.sym_t = 1
         # FSK centre frequency
-        self.f_centre = 400
+        self.f_centre = fc
         # Symbol frequency deviation
-        self.f_delta = 25
+        self.f_delta = fdelta
         # Time sample vector for generating symbol
         self.x = np.linspace(0.0,self.sym_t,self.sym_t*self.fs)
 
