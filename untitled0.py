@@ -7,19 +7,27 @@ Created on Thu Oct 20 21:30:59 2016
 
 from ppfb_channeliser import ppfb_channeliser
 from fsk import fsk
-
+import matplotlib.pyplot as plt
 from scipy.signal import chirp
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.io.wavfile import write
+from scipy.signal import buttord
+from scipy.signal import cheb1ord
+from scipy.signal import butter
+from scipy.signal import freqz
 
 plot_figures = 0
 
 
 fs = 100000000
 in_bw = fs/2
-ch_bw = 200000
-n_ch = 64
+n_ch = 20
+ch_bw = in_bw/n_ch
+wp = ((in_bw/2)-(ch_bw/2))
+ws = (in_bw/2)
+#wp = 100000
+#ws = 150000
 
 bit_stream = '1010101010101010101010'
 
@@ -29,8 +37,17 @@ bit_stream = '1010101010101010101010'
 #write('test.wav', fs, scaled)
 #x = np.cos(2*np.pi*4000*t)
 
-ppfb = ppfb_channeliser(fs, in_bw, ch_bw, n_ch)
-ppfb.create_filter(4000)
+[n,wn] = buttord(wp/fs,ws/fs,1.5,80,False)
+#b, a = butter(n, wn, 'lowpass', False)
+#w, h = freqz(b,a)
+#plt.figure()
+#plt.plot(w, 20 * np.log10(abs(h)))
+print(n)
+n =  cheb1ord(wp/fs,ws/fs,1.5,80,False)
+print(n)
+
+#ppfb = ppfb_channeliser(fs, in_bw, ch_bw, n_ch)
+#ppfb.create_filter(4000)
 
 #fc = ppfb.get_channel_centres()[(n_ch/2+1)+0]
 #print(fc)
