@@ -43,7 +43,7 @@ class ppfb_channeliser:
         self.output_fs = self.channel_spacing
         self.channel_bandwidth = channel_bandwidth
         self.alpha = 1.0
-        self.channel_centres = np.linspace(-fs/2,fs/2,num=9)
+        self.channel_centres = np.linspace(-fs/2,fs/2,num=num_channels/2+1)
         print(self.channel_centres)
         
     def create_filter(self, n_taps):
@@ -52,9 +52,9 @@ class ppfb_channeliser:
         channel_bandwidth = self.channel_bandwidth
         
         cutoff = channel_bandwidth/fs
-        stop = self.alpha*self.channel_spacing/fs
-        stop = min(max(cutoff,stop),0.45)
-        stop = cutoff+(cutoff*0.25)
+ #       stop = self.alpha*self.channel_spacing/fs
+ #       stop = min(max(cutoff,stop),0.45)
+        stop = cutoff+(cutoff*0.5)
         bands = [0, cutoff, stop, 0.5]
         print(bands)
         taps = remez(n_taps, bands, [1,0])
@@ -113,3 +113,6 @@ class ppfb_channeliser:
         
     def get_output_fs(self):
         return self.output_fs
+        
+    def get_channel_centres(self):
+        return self.channel_centres
