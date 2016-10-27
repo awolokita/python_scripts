@@ -37,14 +37,17 @@ bit_stream = '1010101010101010101010'
 #write('test.wav', fs, scaled)
 #x = np.cos(2*np.pi*4000*t)
 
-[n,wn] = buttord(wp/fs,ws/fs,1.5,80,False)
+nfir = (2*fs)/(150000-100000)
+
+nbutt, wnbutt = buttord(wp/fs,ws/fs,1.5,80,False)
+ncheby1, wncheby1 = cheb1ord(wp/fs,ws/fs,1.5,80,False)
 #b, a = butter(n, wn, 'lowpass', False)
 #w, h = freqz(b,a)
 #plt.figure()
 #plt.plot(w, 20 * np.log10(abs(h)))
-print(n)
-n =  cheb1ord(wp/fs,ws/fs,1.5,80,False)
-print(n)
+print('nfir='+str(nfir))
+print('nbutt='+str(nbutt))
+print('ncheby1='+str(ncheby1))
 
 #ppfb = ppfb_channeliser(fs, in_bw, ch_bw, n_ch)
 #ppfb.create_filter(4000)
